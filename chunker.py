@@ -24,50 +24,51 @@ sentence = 'Mr. Vinken is chairman of Elsevier N.V., the Dutch publishing group.
 
 tokens = tokenizer.tokenize(sentence)
 
-
+    
 def parse_training_data(path,dirs):
-	training_data,label_sequence = [],[]
-	for single_file in dirs:
-		with open(path+single_file,'r') as f:
-			sentence,labels = [],[]
-			for line in f:
-				if line == "" or line == " " or line=='\n':
-					if sentence:
-						training_data.append(sentence)
-						sentence = []
-						label_sequence.append(labels)
-						labels = []
-					continue
-				else:
-					
-					if line[0]=='[':
-						tagged_words = line[1:-2].strip().lower().split(' ')
-						for tagged_word in tagged_words:
-							pair = tagged_word.split('/')
-							#print pair
-							sentence.append((pair[0],pair[1]))
-							labels.append('NP')
-					else:
-						tagged_words = line.strip().split(' ')
-						for tagged_word in tagged_words:
-							pair = tagged_word.split('/')
-							if isinstance(pair,list):
-								sentence.append((pair[0],pair[1]))
-							else:
-								sentence.append((pair,'/'))
-							labels.append('-')
-				#print sentence
-			if sentence:
-				training_data.append(sentence)
-				label_sequence.append(labels)
-		return training_data,label_sequence
-		#sys.exit(-1)#sentence.append()
+    training_data,label_sequence = [],[]
+    for single_file in dirs:
+        with open(path+single_file,'r') as f:
+            sentence,labels = [],[]
+            for line in f:
+                if line == "" or line == " " or line=='\n':
+                    if sentence:
+                        training_data.append(sentence)
+                        sentence = []
+                        label_sequence.append(labels)
+                        labels = []
+                        continue
+                else:
+                    try:
+                        if line[0]=='[':
+                            tagged_words = line[1:-2].strip().lower().split(' ')
+                            for tagged_word in tagged_words:
+                                pair = tagged_word.split('/')
+                                sentence.append((pair[0],pair[1]))
+                                labels.append('NP')
+                        else:
+                            tagged_words = line.strip().split(' ')
+                            for tagged_word in tagged_words:
+                                pair = tagged_word.split('/')
+                                if isinstance(pair,list):
+        						  sentence.append((pair[0],pair[1]))
+                                else:
+                                    sentence.append((pair,'/'))
+                                labels.append('-')
+                    except:
+                        pass
+            if sentence:
+                training_data.append(sentence)
+                label_sequence.append(labels)
+    return training_data,label_sequence
 
 mypath = 'tagged/'
 
 
 onlyfiles = [ f for f in listdir(mypath) if isfile(join(mypath,f)) ]
 train_data,label_sequence = parse_training_data(mypath,onlyfiles)
+
+print len(train_data)
 
 def normalize(weights):
     z = sum(weights)
